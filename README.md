@@ -6,9 +6,11 @@
 
 ## 🌐 Live Demo
 
-* 🖥️ Frontend (UI): https://work-tracker-psi-gilt.vercel.app
-* ⚙️ Backend (API): https://work-tracker-1-3ckt.onrender.com
+- 🖥️ Frontend (UI): https://work-tracker-psi-gilt.vercel.app  
+- ⚙️ Backend (API): https://work-tracker-1-3ckt.onrender.com  
 
+⚠️ Note: Backend is an API server. Access endpoints like:
+👉 https://work-tracker-1-3ckt.onrender.com/api/history/2026-04-05
 ---
 
 ## 📌 Features
