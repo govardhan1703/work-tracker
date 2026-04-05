@@ -1,9 +1,12 @@
 import { Router } from "express";
-import DailyHistory from "../models/DailyHistory.js";
+import {
+  getHistoryByDate,
+  putHistoryByDate,
+  deleteHistoryByDate,
+} from "../historyStore.js";
 
 const router = Router();
 
-// Health check for this router
 router.get("/health", (req, res) => {
   res.json({ ok: true });
 });
@@ -11,7 +14,7 @@ router.get("/health", (req, res) => {
 router.get("/:date", async (req, res) => {
   const { date } = req.params;
 
-  const doc = await DailyHistory.findOne({ date }).lean();
+  const doc = await getHistoryByDate(date);
   if (!doc) {
     return res.status(404).json({ error: "Not found" });
   }
@@ -19,7 +22,7 @@ router.get("/:date", async (req, res) => {
   res.json({
     date: doc.date,
     columns: doc.columns,
-    rows: doc.rows
+    rows: doc.rows,
   });
 });
 
@@ -29,33 +32,27 @@ router.put("/:date", async (req, res) => {
 
   if (!Array.isArray(columns) || !Array.isArray(rows)) {
     return res.status(400).json({
-      error: "Invalid body. Expected { columns: string[], rows: object[] }"
+      error: "Invalid body. Expected { columns: string[], rows: object[] }",
     });
   }
 
-  const doc = await DailyHistory.findOneAndUpdate(
-    { date },
-    { date, columns, rows },
-    { upsert: true, new: true }
-  );
-
+  const doc = await putHistoryByDate(date, columns, rows);
   res.json({
     date: doc.date,
     columns: doc.columns,
-    rows: doc.rows
+    rows: doc.rows,
   });
 });
 
 router.delete("/:date", async (req, res) => {
   const { date } = req.params;
 
-  const doc = await DailyHistory.findOneAndDelete({ date }).lean();
-  if (!doc) {
+  const deleted = await deleteHistoryByDate(date);
+  if (!deleted) {
     return res.status(404).json({ error: "Not found" });
   }
 
-  res.json({ ok: true, deleted: doc.date });
+  res.json({ ok: true, deleted });
 });
 
 export default router;
-

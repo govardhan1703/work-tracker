@@ -11,7 +11,9 @@ function loadHistory() {
 
 function DailyTable({ selectedDate }) {
   const API_BASE_URL =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:3001";
 
   const [columns, setColumns] = useState(() => {
     const stored = loadHistory();
@@ -37,7 +39,15 @@ function DailyTable({ selectedDate }) {
 
     (async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/api/history/${selectedDate}`);
+        let res;
+        for (let attempt = 0; attempt < 5; attempt++) {
+          if (cancelled) return;
+          res = await fetch(`${API_BASE_URL}/api/history/${selectedDate}`);
+          if (res.status !== 503) break;
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+        if (cancelled) return;
+
         if (!res.ok) {
           // If not found, we keep local defaults and allow user edits to create it.
           if (res.status === 404) didHydrateFromServerRef.current = true;
